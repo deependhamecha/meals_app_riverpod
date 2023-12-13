@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:meals_app/models/meal.dart';
 import 'package:meals_app/screens/categories.dart';
 import 'package:meals_app/screens/meals.dart';
+import 'package:meals_app/widgets/main_drawer.dart';
 
 class TabsScreen extends StatefulWidget {
 
@@ -47,6 +48,15 @@ class _TabsScreenState extends State<TabsScreen> {
     });
   }
 
+  // For Drawer
+  void _onSelectScreen(String screenName) {
+    if(screenName == 'filters') {
+
+    } else if(screenName == 'meals') {
+      Navigator.of(context).pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -62,6 +72,8 @@ class _TabsScreenState extends State<TabsScreen> {
       appBar: AppBar(
         title: Text(activePageTitle),
       ),
+      // SideBar
+      drawer: const MainDrawer(onSelectScreen: _onSelectScreen),
       body: activePage,
       bottomNavigationBar: BottomNavigationBar(
         onTap: _selectPage,
