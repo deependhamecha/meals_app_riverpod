@@ -3,15 +3,25 @@ import 'package:meals_app/models/meal.dart';
 
 class MealDetailScreen extends StatelessWidget {
 
-  const MealDetailScreen({super.key, required this.meal});
+  const MealDetailScreen({
+    super.key,
+    required this.meal,
+    required this.onToggleFavorite
+  });
 
   final Meal meal;
+  final void Function(Meal meal) onToggleFavorite;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(meal.title),
+        actions: [
+          IconButton(onPressed: () {
+            onToggleFavorite(meal);
+          }, icon: const Icon(Icons.star)),
+        ],
       ),
       // body: Image(image: NetworkImage(meal.imageUrl)),
       // Alternative way
