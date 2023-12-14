@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:meals_app/data/dummy_data.dart';
 import 'package:meals_app/models/meal.dart';
 import 'package:meals_app/screens/categories.dart';
+import 'package:meals_app/screens/filters.dart';
 import 'package:meals_app/screens/meals.dart';
 import 'package:meals_app/widgets/main_drawer.dart';
+
+const kInitialFilters = {
+  Filter.glutenFree: false,
+  Filter.lactoseFree: false,
+  Filter.vegetarian: false,
+  Filter.vegan: false
+};
 
 class TabsScreen extends StatefulWidget {
 
@@ -18,6 +27,7 @@ class _TabsScreenState extends State<TabsScreen> {
 
   int _selectedPageIndex = 0;
   final List<Meal> _favoriteMeals = [];
+  Map<Filter, bool> _selectedFilters = kInitialFilters;
 
   void _showInfoMessage(String message) {
     ScaffoldMessenger.of(context).clearSnackBars();
@@ -49,18 +59,49 @@ class _TabsScreenState extends State<TabsScreen> {
   }
 
   // For Drawer
-  void _onSelectScreen(String screenName) {
-    if(screenName == 'filters') {
+  void _onSelectScreen(String screenName) async {
 
-    } else if(screenName == 'meals') {
-      Navigator.of(context).pop();
+    // Navigator.of(context).pop();
+
+    if(screenName == 'filters') {
+      /**
+       * use pushReplacement() instead of push() to override the last screen
+       * and do not stack.
+       */
+      final result = await Navigator.of(context).push<Map<Filter, bool>>(
+        MaterialPageRoute(
+          builder: (ctx) => FiltersScreen(currentFilters: _selectedFilters,),
+        ),
+      );
+
+      setState(() {
+        _selectedFilters = result ?? kInitialFilters;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
 
-    Widget activePage = CategoriesScreen(onToggleFavorite: _toggleMealFavoriteStatus);
+    final availableMeals = dummyMeals.where((meal) {
+      if(_selectedFilters[Filter.glutenFree]! && !meal.isGlutenFree) {
+        return false;
+      } else if(_selectedFilters[Filter.lactoseFree]! && !meal.isLactoseFree) {
+        return false;
+      } else if(_selectedFilters[Filter.vegetarian]! && !meal.isVegetarian) {
+        return false;
+      } else if(_selectedFilters[Filter.vegan]! && !meal.isVegan) {
+        return false;
+      } else {
+        return true;
+      }
+
+    }).toList();
+
+    Widget activePage = CategoriesScreen(
+      onToggleFavorite: _toggleMealFavoriteStatus,
+      availableMeals: availableMeals,
+    );
     var activePageTitle = 'Categories';
 
     if(_selectedPageIndex == 1) {
@@ -73,7 +114,7 @@ class _TabsScreenState extends State<TabsScreen> {
         title: Text(activePageTitle),
       ),
       // SideBar
-      drawer: const MainDrawer(onSelectScreen: _onSelectScreen),
+      drawer: MainDrawer(onSelectScreen: _onSelectScreen),
       body: activePage,
       bottomNavigationBar: BottomNavigationBar(
         onTap: _selectPage,
